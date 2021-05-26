@@ -1,0 +1,10 @@
+*.pyc
+*.npy
+*.npz
+*.json
+
+*.jpg
+*.png
+
+*~
+.vscode/
