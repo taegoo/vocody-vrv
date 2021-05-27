@@ -65,11 +65,11 @@ def cleanup_vrv(uid):
 
     return "", 200
 
-@api.route("/files")
+@api.route("/api/files")
 def list_files():
     files = []
-    for filename in os.listdir(UPLOAD_DIRECTORY):
-        path = os.path.join(UPLOAD_DIRECTORY, filename)
+    for filename in os.listdir(DOWNLOAD_DIRECTORY):
+        path = os.path.join(DOWNLOAD_DIRECTORY, filename)
         if os.path.isfile(path):
             files.append(filename)
     return jsonify(files)
