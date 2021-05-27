@@ -4,7 +4,7 @@
 Flask
 tqdm >= 4.30
 librosa >= 0.6.3
-opencv_python >= 4.2.0
+#opencv_python >= 4.2.0
 colorama >= 0.3.9
 soundfile
 pydub == 0.25.1

@@ -4,7 +4,7 @@ import librosa
 import numpy as np
 import soundfile as sf
 import torch
-import cv2
+#import cv2
 from tqdm import tqdm
 from lib import dataset
 from lib import nets
@@ -199,6 +199,7 @@ def main():
     sf.write('{}_Vocals.wav'.format(basename), wave.T, sr)
     sf.write('{}_Vocals.wav'.format(basename), wave.T, sr)
 
+    """
     if args.output_image:
         with open('{}_Instruments.jpg'.format(basename), mode='wb') as f:
             image = spec_utils.spectrogram_to_image(y_spec)
@@ -208,6 +209,7 @@ def main():
             image = spec_utils.spectrogram_to_image(v_spec)
             _, bin_image = cv2.imencode('.jpg', image)
             bin_image.tofile(f)
+    """
 
 
 if __name__ == '__main__':
