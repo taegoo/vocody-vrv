@@ -29,6 +29,7 @@ if torch.cuda.is_available():
     model.to(device)
 print('done')
 
+
 # Main API
 @api.route("/api/vrv/<uid>", methods=["POST"])
 def process_vrv(uid):
@@ -80,4 +81,4 @@ def ping():
 
 
 if __name__ == "__main__":
-    api.run(debug=True, port=8000)
+    api.run(debug=True, port=5000)
