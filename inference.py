@@ -1,18 +1,15 @@
 import argparse
 import os
-
-import cv2
 import librosa
 import numpy as np
 import soundfile as sf
 import torch
+import cv2
 from tqdm import tqdm
-
 from lib import dataset
 from lib import nets
 from lib import spec_utils
 from pydub import AudioSegment
-
 
 class VocalRemover(object):
 
@@ -89,6 +86,50 @@ class VocalRemover(object):
         pred_tta = pred_tta[:, :, :n_frame]
 
         return (pred + pred_tta) * 0.5 * coef, X_mag, np.exp(1.j * X_phase)
+    
+# Main API
+def execute_vr(model, in_device, source_path, output_dir, uid):
+    # parameters
+    arg_n_fft = 2048
+    arg_window_size = 1024
+    arg_sr = 44100
+    arg_hop_length = 1024
+
+    device = in_device
+    if torch.cuda.is_available():
+        device = torch.device('cuda:{}'.format(0))
+        model.to(device)
+
+    print('loading wave source...', end=' ')
+    X, sr = librosa.load(source_path, arg_sr, False, dtype=np.float32, res_type='kaiser_fast')
+    print('done:')
+
+    if X.ndim == 1:
+        X = np.asarray([X, X])
+
+    print('stft of wave source...', end=' ')
+    X = spec_utils.wave_to_spectrogram(X, arg_hop_length, arg_n_fft)
+    print('done')
+
+    vr = VocalRemover(model, device, arg_window_size)
+    pred, X_mag, X_phase = vr.inference(X)
+
+    print('inverse stft of instruments...', end=' ')
+    y_spec = pred * X_phase
+    wave = spec_utils.spectrogram_to_wave(y_spec, hop_length=arg_hop_length)
+    print('done')
+    wav_path = os.path.join(output_dir, '{}.wav'.format(uid))
+    mp3_path = os.path.join(output_dir, '{}.mp3'.format(uid))
+    sf.write(wav_path, wave.T, sr)
+
+    print('converting to mp3')
+    output_convert = AudioSegment.from_wav(wav_path)
+    output_convert.export(mp3_path, format="mp3", bitrate="192k")
+    # remove temp wav
+    if os.path.exists(wav_path):
+        os.remove(wav_path)
+    print('done mp3: ', mp3_path)
+    return mp3_path
 
 
 def main():
@@ -151,17 +192,13 @@ def main():
     output_convert = AudioSegment.from_wav(wav_path)
     output_convert.export(mp3_path, format="mp3", bitrate="192k")
 
-
-    """
     print('inverse stft of vocals...', end=' ')
     v_spec = np.clip(X_mag - pred, 0, np.inf) * X_phase
     wave = spec_utils.spectrogram_to_wave(v_spec, hop_length=args.hop_length)
     print('done')
     sf.write('{}_Vocals.wav'.format(basename), wave.T, sr)
     sf.write('{}_Vocals.wav'.format(basename), wave.T, sr)
-    """
 
-    """
     if args.output_image:
         with open('{}_Instruments.jpg'.format(basename), mode='wb') as f:
             image = spec_utils.spectrogram_to_image(y_spec)
@@ -171,7 +208,6 @@ def main():
             image = spec_utils.spectrogram_to_image(v_spec)
             _, bin_image = cv2.imencode('.jpg', image)
             bin_image.tofile(f)
-    """
 
 
 if __name__ == '__main__':

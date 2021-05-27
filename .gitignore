@@ -10,3 +10,5 @@
 .vscode/
 *.DS_Store
 output/*
+samples/downloaded.mp3
+downloads/*
