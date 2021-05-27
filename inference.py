@@ -11,6 +11,7 @@ from tqdm import tqdm
 from lib import dataset
 from lib import nets
 from lib import spec_utils
+from pydub import AudioSegment
 
 
 class VocalRemover(object):
@@ -92,8 +93,8 @@ class VocalRemover(object):
 
 def main():
     p = argparse.ArgumentParser()
-    p.add_argument('--gpu', '-g', type=int, default=-1)
-    p.add_argument('--pretrained_model', '-P', type=str, default='models/baseline.pth')
+    p.add_argument('--gpu', '-g', type=int, default=1)
+    p.add_argument('--pretrained_model', '-P', type=str, default='models/v4_sr44100_hl512_nf2048.pth')
     p.add_argument('--input', '-i', required=True)
     p.add_argument('--sr', '-r', type=int, default=44100)
     p.add_argument('--n_fft', '-f', type=int, default=2048)
@@ -143,14 +144,24 @@ def main():
     y_spec = pred * X_phase
     wave = spec_utils.spectrogram_to_wave(y_spec, hop_length=args.hop_length)
     print('done')
-    sf.write('{}_Instruments.wav'.format(basename), wave.T, sr)
+    wav_path = '{}_output.wav'.format(basename)
+    mp3_path = '{}_output.mp3'.format(basename)
+    sf.write(wav_path, wave.T, sr)
+    print('converting to mp3')
+    output_convert = AudioSegment.from_wav(wav_path)
+    output_convert.export(mp3_path, format="mp3", bitrate="192k")
 
+
+    """
     print('inverse stft of vocals...', end=' ')
     v_spec = np.clip(X_mag - pred, 0, np.inf) * X_phase
     wave = spec_utils.spectrogram_to_wave(v_spec, hop_length=args.hop_length)
     print('done')
     sf.write('{}_Vocals.wav'.format(basename), wave.T, sr)
+    sf.write('{}_Vocals.wav'.format(basename), wave.T, sr)
+    """
 
+    """
     if args.output_image:
         with open('{}_Instruments.jpg'.format(basename), mode='wb') as f:
             image = spec_utils.spectrogram_to_image(y_spec)
@@ -160,6 +171,7 @@ def main():
             image = spec_utils.spectrogram_to_image(v_spec)
             _, bin_image = cv2.imencode('.jpg', image)
             bin_image.tofile(f)
+    """
 
 
 if __name__ == '__main__':
