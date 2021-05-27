@@ -8,6 +8,5 @@
 
 *~
 .vscode/
-models/.DS_Store
-titanium_44100_output.mp3
-titanium_44100_output.wav
+*.DS_Store
+output/*
