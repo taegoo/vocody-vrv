@@ -74,6 +74,10 @@ def list_files():
             files.append(filename)
     return jsonify(files)
 
+@api.route("/ping")
+def ping():
+    return "pong", 200
+
 
 if __name__ == "__main__":
     api.run(debug=True, port=8000)
