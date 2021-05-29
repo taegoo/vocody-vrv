@@ -37,9 +37,9 @@ def process_vrv(uid):
         # Return 400 BAD REQUEST
         abort(400, "No subdirectories allowed")
 
-    referer = request.headers.get("Referer")
-    print('referer: ', referer)
-    if "songmaker" not in referer.lower():
+    agent = request.headers.get("User-Agent")
+    print('user-agent: ', agent)
+    if "songmaker" not in agent.lower():
         print('Illegal header')
         abort(400, "No subdirectories allowed")
 
@@ -59,8 +59,11 @@ def cleanup_vrv(uid):
     if "/" in uid:
         # Return 400 BAD REQUEST
         abort(400, "No subdirectories allowed")
-    referer = request.headers.get("Referer")
-    print('referer: ', referer)
+    agent = request.headers.get("User-Agent")
+    print('user-agent: ', agent)
+    if "songmaker" not in agent.lower():
+        print('Illegal header')
+        abort(400, "No subdirectories allowed")
 
     # uploaded file
     path = os.path.join(UPLOAD_DIRECTORY, '{}.mp3'.format(uid))
@@ -78,9 +81,9 @@ def cleanup_vrv(uid):
 
 @api.route("/api/files")
 def list_files():
-    referer = request.headers.get("Referer")
-    print('referer: ', referer)
-    if "songmaker" not in referer.lower():
+    agent = request.headers.get("User-Agent")
+    print('user-agent: ', agent)
+    if "songmaker" not in agent.lower():
         print('Illegal header')
         abort(400, "No subdirectories allowed")
 
@@ -93,8 +96,10 @@ def list_files():
 
 @api.route("/ping")
 def ping():
+    agent = request.headers.get("User-Agent")
+    print('user-agent: ', agent)
     return "pong", 200
 
 
 if __name__ == "__main__":
-    api.run(debug=True, port=5000)
+    api.run(host='0.0.0.0')
