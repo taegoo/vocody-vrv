@@ -36,6 +36,13 @@ def process_vrv(uid):
     if "/" in uid:
         # Return 400 BAD REQUEST
         abort(400, "No subdirectories allowed")
+
+    referer = request.headers.get("Referer")
+    print('referer: ', referer)
+    if "songmaker" not in referer.lower():
+        print('Illegal header')
+        abort(400, "No subdirectories allowed")
+
     input_path = os.path.join(UPLOAD_DIRECTORY, '{}.mp3'.format(uid))
     uploaded_file = request.files['file']
     uploaded_file.save(input_path)
@@ -52,6 +59,9 @@ def cleanup_vrv(uid):
     if "/" in uid:
         # Return 400 BAD REQUEST
         abort(400, "No subdirectories allowed")
+    referer = request.headers.get("Referer")
+    print('referer: ', referer)
+
     # uploaded file
     path = os.path.join(UPLOAD_DIRECTORY, '{}.mp3'.format(uid))
     if os.path.exists(path):
@@ -68,6 +78,12 @@ def cleanup_vrv(uid):
 
 @api.route("/api/files")
 def list_files():
+    referer = request.headers.get("Referer")
+    print('referer: ', referer)
+    if "songmaker" not in referer.lower():
+        print('Illegal header')
+        abort(400, "No subdirectories allowed")
+
     files = []
     for filename in os.listdir(DOWNLOAD_DIRECTORY):
         path = os.path.join(DOWNLOAD_DIRECTORY, filename)
