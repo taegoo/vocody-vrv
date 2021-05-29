@@ -5,7 +5,6 @@ torch
 torchvision
 torchaudio
 #############
-ffmpeg
 Flask
 tqdm >= 4.30
 librosa >= 0.6.3
